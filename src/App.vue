@@ -5,7 +5,7 @@ import Button from './components/Button.vue';
 
 <template>
   <main class="main">
-    <Button>Сохранить</Button>
+    <Button>Начать игру</Button>
   </main>
 </template>
 
