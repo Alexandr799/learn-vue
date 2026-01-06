@@ -13,11 +13,11 @@ import Score from './components/Score.vue';
         ЗАПОМНИ СЛОВО
       </div>
       <div>
-        <Score count="110" />
+        <Score count="100" />
       </div>
     </header>
     <div style="padding: 20px;">
-      <Card word="Тест" number="01"/>
+      <Card word="Test" translate="Тест" number="01"/>
     </div>
     <div class="button-line">
       <Button>Начать игру</Button>

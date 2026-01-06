@@ -1,6 +1,11 @@
 <script setup>
+import { ref } from 'vue';
+import SuccessIcon from './Icons/SuccessIcon.vue';
+import IconReset from './Icons/IconReset.vue';
+
 const emit = defineEmits(['changeStatus', 'turn'])
-const { word, number } = defineProps({
+
+const { word, number, translate } = defineProps({
     word: {
         type: String,
         default: '',
@@ -8,8 +13,28 @@ const { word, number } = defineProps({
     number: {
         type: String,
         default: '01',
+    },
+    translate: {
+        type: String,
+        default: '',
     }
 })
+
+const status = ref('choising')
+const isTurned = ref(false)
+
+
+function turn() {
+    isTurned.value = !isTurned.value
+    emit('turn')
+}
+
+function changeStatus(newStatus) {
+    isTurned.value = false
+    status.value = newStatus
+    emit('changeStatus')
+}
+
 </script>
 
 <template>
@@ -18,10 +43,21 @@ const { word, number } = defineProps({
             <span class="number">
                 {{ number }}
             </span>
-            {{ word }}
-            <button class="changebutton">
+            <span v-if="status === 'success' || status === 'fail'" class="status-panel">
+                <SuccessIcon v-if="status === 'success'"/>
+                <IconReset v-if="status === 'fail'"/>
+            </span>
+            {{ !isTurned && status === 'choising' ? word : translate }}
+            <button v-if="!isTurned && status === 'choising'" class="turnbutton" @click="turn">
                 Перевернуть
             </button>
+            <div v-if="isTurned" class="choiseStatusPanel">
+                <IconReset style="cursor: pointer;" :width="19.5" :height="19.5" @click="changeStatus('fail')" />
+                <SuccessIcon style="cursor: pointer;" :width="19.5" :height="19.5" @click="changeStatus('success')" />
+            </div>
+            <span v-if="!isTurned && status !== 'choising'" class="endlabel">
+                ЗАВЕРШЕНО
+            </span>
         </div>
     </article>
 </template>
@@ -56,7 +92,7 @@ const { word, number } = defineProps({
     position: relative;
 }
 
-.changebutton {
+.turnbutton, .endlabel {
     position: absolute;
     left: 50%;
     bottom: -11px;
@@ -69,5 +105,25 @@ const { word, number } = defineProps({
     font-weight: 700;
     line-height: 18px;
     letter-spacing: 12%;
+}
+
+.choiseStatusPanel {
+    display: flex;
+    gap: 25px;
+    padding: 3px 10px;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-card);
+    bottom: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.status-panel {
+    position: absolute;
+    top: -19px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 </style>
