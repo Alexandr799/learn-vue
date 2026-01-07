@@ -11,6 +11,18 @@ const cards = ref([
     translation: 'тест',
     status: 'pending',
     state: 'closed',
+  },
+  {
+    word: 'food',
+    translation: 'еда',
+    status: 'pending',
+    state: 'closed',
+  },
+  {
+    word: 'game',
+    translation: 'игра',
+    status: 'pending',
+    state: 'closed',
   }
 ])
 
@@ -37,9 +49,15 @@ function changeStatus(newStatus, number) {
         <Score :count="scores" />
       </div>
     </header>
-    <div style="padding: 20px;">
-      <div v-for="(value, ind) in cards" :key="ind">
-        <Card :status="value.status" :word="value.word" :translation="value.translation" :number="ind" :state="value.state" @turn="turn" @change-status="changeStatus"/>
+    <div class="card-container">
+      <div v-for="(value, ind) in cards" :key="ind" class="card-wrap">
+        <Card 
+            :status="value.status" :word="value.word" 
+            :translation="value.translation" :number="ind"
+            :state="value.state" 
+            @turn="turn" 
+            @change-status="changeStatus" 
+          />
       </div>
     </div>
     <div class="button-line">
@@ -53,6 +71,17 @@ function changeStatus(newStatus, number) {
   background-color: var(--color-bg-main);
   border-radius: 25px;
   padding: 20px;
+}
+
+.card-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+}
+
+.card-wrap {
+  width: calc(100% / 3 - 20px);
 }
 
 .header {
