@@ -1,9 +1,30 @@
 <script setup>
+import { ref } from 'vue';
 import Button from './components/Button.vue';
 import Card from './components/Card.vue';
 import Score from './components/Score.vue';
 
+const scores = ref(0)
+const cards = ref([
+  {
+    word: 'test',
+    translation: 'тест',
+    status: 'pending',
+    state: 'closed',
+  }
+])
 
+function turn(newState, number) {
+  cards.value[number].state = newState
+}
+
+function changeStatus(newStatus, number) {
+  cards.value[number].state = 'closed'
+  cards.value[number].status = newStatus
+  if (newStatus === 'success') {
+    scores.value += 1
+  }
+}
 </script>
 
 <template>
@@ -13,11 +34,13 @@ import Score from './components/Score.vue';
         ЗАПОМНИ СЛОВО
       </div>
       <div>
-        <Score count="100" />
+        <Score :count="scores" />
       </div>
     </header>
     <div style="padding: 20px;">
-      <Card word="Test" translate="Тест" number="01"/>
+      <div v-for="(value, ind) in cards" :key="ind">
+        <Card :status="value.status" :word="value.word" :translation="value.translation" :number="ind" :state="value.state" @turn="turn" @change-status="changeStatus"/>
+      </div>
     </div>
     <div class="button-line">
       <Button>Начать игру</Button>

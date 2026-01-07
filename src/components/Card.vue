@@ -1,38 +1,47 @@
 <script setup>
-import { ref } from 'vue';
-import SuccessIcon from './Icons/SuccessIcon.vue';
+import IconSuccess from './Icons/IconSuccess.vue';
 import IconReset from './Icons/IconReset.vue';
+import { computed } from 'vue';
 
 const emit = defineEmits(['changeStatus', 'turn'])
 
-const { word, number, translate } = defineProps({
+const { word, number, translation, status, state } = defineProps({
     word: {
         type: String,
         default: '',
     },
     number: {
-        type: String,
-        default: '01',
+        type: Number,
+        default: 0,
     },
-    translate: {
+    translation: {
         type: String,
         default: '',
+    },
+    status: {
+        type: String,
+        default: 'pending',
+    },
+    state: {
+        type: String,
+        default: 'closed',
     }
 })
 
-const status = ref('choising')
-const isTurned = ref(false)
-
+const numberPrepare = computed(()=>{
+    const res = number + 1
+    if (res < 10) {
+        return '0' + res.toString()
+    }
+    return res.toString()
+})
 
 function turn() {
-    isTurned.value = !isTurned.value
-    emit('turn')
+    emit('turn', 'opened', number)
 }
 
 function changeStatus(newStatus) {
-    isTurned.value = false
-    status.value = newStatus
-    emit('changeStatus')
+    emit('changeStatus', newStatus, number)
 }
 
 </script>
@@ -41,21 +50,21 @@ function changeStatus(newStatus) {
     <article class="card">
         <div class="border">
             <span class="number">
-                {{ number }}
+                {{ numberPrepare }}
             </span>
-            <span v-if="status === 'success' || status === 'fail'" class="status-panel">
-                <SuccessIcon v-if="status === 'success'"/>
-                <IconReset v-if="status === 'fail'"/>
+            <span class="status-panel">
+                <IconSuccess v-if="status === 'success'" />
+                <IconReset v-if="status === 'fail'" />
             </span>
-            {{ !isTurned && status === 'choising' ? word : translate }}
-            <button v-if="!isTurned && status === 'choising'" class="turnbutton" @click="turn">
+            {{ state === 'closed' && status === 'pending' ? word : translation }}
+            <div v-if="state === 'opened'" class="choiseStatusPanel">
+                <IconReset style="cursor: pointer;" :width="19.5" :height="19.5" @click="changeStatus('fail')" />
+                <IconSuccess style="cursor: pointer;" :width="19.5" :height="19.5" @click="changeStatus('success')" />
+            </div>
+            <button v-if="state == 'closed' && status === 'pending'" class="turnbutton" @click="turn">
                 Перевернуть
             </button>
-            <div v-if="isTurned" class="choiseStatusPanel">
-                <IconReset style="cursor: pointer;" :width="19.5" :height="19.5" @click="changeStatus('fail')" />
-                <SuccessIcon style="cursor: pointer;" :width="19.5" :height="19.5" @click="changeStatus('success')" />
-            </div>
-            <span v-if="!isTurned && status !== 'choising'" class="endlabel">
+            <span v-if="state === 'closed' && status !== 'pending'" class="endlabel">
                 ЗАВЕРШЕНО
             </span>
         </div>
@@ -92,7 +101,8 @@ function changeStatus(newStatus) {
     position: relative;
 }
 
-.turnbutton, .endlabel {
+.turnbutton,
+.endlabel {
     position: absolute;
     left: 50%;
     bottom: -11px;
