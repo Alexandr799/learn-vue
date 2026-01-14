@@ -1,30 +1,38 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import Button from './components/Button.vue';
 import Card from './components/Card.vue';
 import Score from './components/Score.vue';
 
+const API = 'http://localhost:8080/api/random-words'
 const scores = ref(0)
-const cards = ref([
-  {
-    word: 'test',
-    translation: 'тест',
-    status: 'pending',
-    state: 'closed',
-  },
-  {
-    word: 'food',
-    translation: 'еда',
-    status: 'pending',
-    state: 'closed',
-  },
-  {
-    word: 'game',
-    translation: 'игра',
-    status: 'pending',
-    state: 'closed',
+const cards = ref([])
+const error = ref(null)
+const loading = ref(false)
+
+onMounted(async () => {
+  try {
+    loading.value = true
+    let res = await fetch(API);
+    if (res.status !== 200) {
+      error.value = 'Что-то пошло не так!'
+      return
+    }
+    res = await res.json()
+    error.value = null
+    cards.value = res.map(el => ({
+      word: el.word,
+      translation: el.translation,
+      status: 'pending',
+      state: 'closed',
+    }))
+  } catch {
+    error.value = 'Что-то пошло не так!'
+    return
+  } finally {
+    loading.value = false
   }
-])
+})
 
 function turn(newState, number) {
   cards.value[number].state = newState
@@ -49,16 +57,19 @@ function changeStatus(newStatus, number) {
         <Score :count="scores" />
       </div>
     </header>
-    <div class="card-container">
-      <div v-for="(value, ind) in cards" :key="ind" class="card-wrap">
-        <Card 
-            :status="value.status" :word="value.word" 
-            :translation="value.translation" :number="ind"
-            :state="value.state" 
-            @turn="turn" 
-            @change-status="changeStatus" 
-          />
+    <div class="card-container" v-if="!loading">
+      <template v-if="!error">
+        <div v-for="(value, ind) in cards" :key="ind" class="card-wrap">
+          <Card :status="value.status" :word="value.word" :translation="value.translation" :number="ind"
+            :state="value.state" @turn="turn" @change-status="changeStatus" />
+        </div>
+      </template>
+      <div v-else>
+        {{ error }}
       </div>
+    </div>
+    <div v-else class="card-container">
+      Загрузка
     </div>
     <div class="button-line">
       <Button>Начать игру</Button>
