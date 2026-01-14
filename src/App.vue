@@ -9,8 +9,10 @@ const scores = ref(0)
 const cards = ref([])
 const error = ref(null)
 const loading = ref(false)
-
-onMounted(async () => {
+const firstGame = ref(true)
+const update = async () => {
+  firstGame.value = false
+  scores.value = 0
   try {
     loading.value = true
     let res = await fetch(API);
@@ -32,7 +34,7 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
 
 function turn(newState, number) {
   cards.value[number].state = newState
@@ -42,7 +44,11 @@ function changeStatus(newStatus, number) {
   cards.value[number].state = 'closed'
   cards.value[number].status = newStatus
   if (newStatus === 'success') {
-    scores.value += 1
+    scores.value += 10
+  }
+
+  if (newStatus === 'fail') {
+    scores.value -= 4
   }
 }
 </script>
@@ -72,7 +78,7 @@ function changeStatus(newStatus, number) {
       Загрузка
     </div>
     <div class="button-line">
-      <Button>Начать игру</Button>
+      <Button @click="update">{{ firstGame ? 'Начать игру' : 'Начать заново' }}</Button>
     </div>
   </main>
 </template>
